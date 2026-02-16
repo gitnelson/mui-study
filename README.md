@@ -25,6 +25,37 @@ npm run dev
 
 Opens at `http://localhost:5173`.
 
+## How much is custom vs. base MUI? (Option 7 breakdown)
+
+### Base MUI Autocomplete (zero custom code)
+
+- `multiple` -- built-in multi-select mode
+- `disableCloseOnSelect` -- built-in prop, keeps dropdown open after selection
+- `autoHighlight` -- built-in prop, highlights first option automatically
+- `options`, `value`, `onChange` -- standard controlled component pattern
+- `getOptionLabel` -- standard prop
+- `isOptionEqualToValue` -- standard prop for custom object comparison
+- `renderInput` with `TextField` -- standard pattern
+- The `sx` styling for fixed height (`flexWrap: 'nowrap'`, `height: 56`, `overflow: 'hidden'`) -- standard MUI `sx` props, though using them this way is a customization choice
+
+### Light customization (using MUI's extension points as intended)
+
+- `filterOptions` -- MUI provides this prop specifically for custom filtering logic. We're just adding conditional visibility for Select All. ~5 lines of custom logic.
+- `renderTags` -- MUI provides this prop for custom tag rendering. We replaced chips with a text summary. ~15 lines of custom JSX.
+- `renderOption` -- MUI provides this prop for custom option rendering. We added checkboxes and styled the Select All row. ~15 lines of custom JSX.
+- `onChange` with `reason` parameter -- MUI passes `reason` as a third argument by design. We're using it to detect `removeOption`. Standard API surface.
+
+### Truly custom (working around/beyond MUI)
+
+- The `SELECT_ALL` synthetic option injected into the options array -- MUI has no built-in "select all." ~15 lines of handling logic.
+- The `backspacePressed` ref + `onKeyDown` handler -- this is the only part where we're intercepting behavior MUI doesn't natively support. ~10 lines.
+
+### Summary
+
+Roughly 80% of option 7 is MUI's built-in API used as documented. The Select All toggle and the backspace-clears-all behavior are the two pieces of genuine custom logic, totaling about 25 lines. Everything else is MUI's Autocomplete doing what it was designed to do -- we're just choosing which extension points to use and how.
+
+We're not fighting the framework -- we're using its intended customization surface.
+
 ## Tech
 
 - React 19
