@@ -12,6 +12,8 @@ import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Collapse from '@mui/material/Collapse';
 import Divider from '@mui/material/Divider';
+import IconButton from '@mui/material/IconButton';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import Paper from '@mui/material/Paper';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
@@ -769,6 +771,7 @@ const LANES: LaneData[] = buildLanes();
 
 export default function AuthSequenceLanes() {
   const [healthFilter, setHealthFilter] = useState<HealthFilter>('all');
+  const [showHint, setShowHint] = useState(false);
 
   // Compute per-lane health for filtering and highlighting
   const laneHealthMap = useMemo(() => {
@@ -821,12 +824,19 @@ export default function AuthSequenceLanes() {
   return (
     <Box sx={{ p: 3 }}>
       {/* Page header */}
-      <Typography variant="h4" gutterBottom>
-        Auth Sequencing — Concept B: Sequence Lanes
-      </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2.5 }}>
-        One lane per terminal. Select a product to view that product's authorization sequence. Click any slot card to expand volume and expiry details.
-      </Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: showHint ? 0.5 : 2.5 }}>
+        <Typography variant="h4">
+          Auth Sequencing — Concept B: Sequence Lanes
+        </Typography>
+        <IconButton size="small" onClick={() => setShowHint((v) => !v)} sx={{ color: showHint ? 'primary.main' : 'text.disabled' }}>
+          <VisibilityIcon fontSize="small" />
+        </IconButton>
+      </Box>
+      <Collapse in={showHint}>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2.5 }}>
+          One lane per terminal. Select a product to view that product's authorization sequence. Click any slot card to expand volume and expiry details.
+        </Typography>
+      </Collapse>
 
       {/* Filter bar */}
       <Box sx={{ mb: 2.5 }}>

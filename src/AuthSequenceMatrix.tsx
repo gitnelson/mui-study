@@ -17,6 +17,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ViewModuleIcon from '@mui/icons-material/ViewModule';
 import ViewListIcon from '@mui/icons-material/ViewList';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 
 // ---------------------------------------------------------------------------
 // Types (shared with AuthSequencingGrid)
@@ -509,6 +510,7 @@ export default function AuthSequenceMatrix() {
   const [groupBy, setGroupBy] = useState<GroupBy>('byLocation');
   const [healthFilter, setHealthFilter] = useState<string>('all');
   const [compact, setCompact] = useState(false);
+  const [showHint, setShowHint] = useState(false);
 
   const selectedCell = selectedKey
     ? MATRIX_DATA.find((c) => `${c.locationId}|${c.productCode}` === selectedKey) ?? null
@@ -555,13 +557,20 @@ export default function AuthSequenceMatrix() {
     <Box sx={{ p: 3, maxWidth: 1600, mx: 'auto' }}>
       {/* Header */}
       <Box sx={{ mb: 3 }}>
-        <Typography variant="h4" gutterBottom>
-          Auth Sequencing — Heat Map Matrix
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Spatial overview of your authorization portfolio. Each cell = one location × product combination.
-          Click any cell to inspect the full sequence stack.
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: showHint ? 0.5 : 0 }}>
+          <Typography variant="h4">
+            Auth Sequencing — Heat Map Matrix
+          </Typography>
+          <IconButton size="small" onClick={() => setShowHint((v) => !v)} sx={{ color: showHint ? 'primary.main' : 'text.disabled' }}>
+            <VisibilityIcon fontSize="small" />
+          </IconButton>
+        </Box>
+        <Collapse in={showHint}>
+          <Typography variant="body2" color="text.secondary">
+            Spatial overview of your authorization portfolio. Each cell = one location × product combination.
+            Click any cell to inspect the full sequence stack.
+          </Typography>
+        </Collapse>
       </Box>
 
       {/* Summary bar */}

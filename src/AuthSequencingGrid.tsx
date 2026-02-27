@@ -1,4 +1,7 @@
 import { useState, useCallback } from 'react';
+import IconButton from '@mui/material/IconButton';
+import Collapse from '@mui/material/Collapse';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import {
   DataGridPremium,
   useGridApiRef,
@@ -543,15 +546,23 @@ type ViewMode = 'byLocation' | 'byProduct';
 
 export default function AuthSequencingGrid() {
   const [view, setView] = useState<ViewMode>('byLocation');
+  const [showHint, setShowHint] = useState(false);
 
   return (
     <Box sx={{ p: 3, maxWidth: 1600, mx: 'auto' }}>
-      <Typography variant="h4" gutterBottom>
-        Auth Sequencing — View Prototype
-      </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-        Drag supplier rows to reorder the authorization sequence within each product group.
-      </Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: showHint ? 0.5 : 3 }}>
+        <Typography variant="h4">
+          Auth Sequencing — View Prototype
+        </Typography>
+        <IconButton size="small" onClick={() => setShowHint((v) => !v)} sx={{ color: showHint ? 'primary.main' : 'text.disabled' }}>
+          <VisibilityIcon fontSize="small" />
+        </IconButton>
+      </Box>
+      <Collapse in={showHint}>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+          Drag supplier rows to reorder the authorization sequence within each product group.
+        </Typography>
+      </Collapse>
 
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
         <Typography variant="body2" sx={{ fontWeight: 600 }}>View By:</Typography>
