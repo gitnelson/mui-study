@@ -3,8 +3,11 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import FixedHeightMultiSelect from './FixedHeightMultiSelect';
 import AuthSequencingGrid from './AuthSequencingGrid';
 import AuthSequenceMatrix from './AuthSequenceMatrix';
@@ -41,8 +44,27 @@ function navigate(page: Page) {
 
 const AUTH_PAGES: Page[] = ['auth-sequencing', 'auth-matrix', 'auth-lanes', 'auth-split'];
 
-function NavBar({ current }: { current: Page }) {
+function NavBar({ current, collapsed, onToggle }: { current: Page; collapsed: boolean; onToggle: () => void }) {
   const isAuthPage = AUTH_PAGES.includes(current);
+
+  if (collapsed) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          borderBottom: 1,
+          borderColor: 'divider',
+          bgcolor: 'background.paper',
+        }}
+      >
+        <IconButton size="small" onClick={onToggle} sx={{ py: 0.25 }}>
+          <KeyboardArrowDownIcon fontSize="small" />
+        </IconButton>
+      </Box>
+    );
+  }
+
   return (
     <Box
       sx={{
@@ -111,6 +133,12 @@ function NavBar({ current }: { current: Page }) {
       >
         Split View
       </Button>
+
+      <Box sx={{ ml: 'auto' }}>
+        <IconButton size="small" onClick={onToggle}>
+          <KeyboardArrowUpIcon fontSize="small" />
+        </IconButton>
+      </Box>
     </Box>
   );
 }
@@ -206,6 +234,7 @@ function HomePage() {
 
 function App() {
   const [page, setPage] = useState<Page>(getPageFromHash);
+  const [navCollapsed, setNavCollapsed] = useState(false);
 
   useEffect(() => {
     const onHashChange = () => setPage(getPageFromHash());
@@ -216,7 +245,7 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <NavBar current={page} />
+      <NavBar current={page} collapsed={navCollapsed} onToggle={() => setNavCollapsed((c) => !c)} />
       {page === 'home' && <HomePage />}
       {page === 'multiselect' && <FixedHeightMultiSelect />}
       {page === 'auth-sequencing' && <AuthSequencingGrid />}
