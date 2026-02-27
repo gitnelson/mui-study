@@ -52,10 +52,11 @@ function NavBar({ current, collapsed, onToggle }: { current: Page; collapsed: bo
       <Box
         sx={{
           display: 'flex',
-          justifyContent: 'center',
+          justifyContent: 'flex-end',
           borderBottom: 1,
           borderColor: 'divider',
           bgcolor: 'background.paper',
+          px: 3,
         }}
       >
         <IconButton size="small" onClick={onToggle} sx={{ py: 0.25 }}>
