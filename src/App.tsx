@@ -13,6 +13,7 @@ import AuthSequencingGrid from './AuthSequencingGrid';
 import AuthSequenceMatrix from './AuthSequenceMatrix';
 import AuthSequenceLanes from './AuthSequenceLanes';
 import AuthSequenceSplitView from './AuthSequenceSplitView';
+import AuthSequencingCardView from './AuthSequencingCardView';
 
 const theme = createTheme({
   palette: {
@@ -26,7 +27,8 @@ type Page =
   | 'auth-sequencing'
   | 'auth-matrix'
   | 'auth-lanes'
-  | 'auth-split';
+  | 'auth-split'
+  | 'auth-cards';
 
 function getPageFromHash(): Page {
   const hash = window.location.hash.replace('#', '');
@@ -35,6 +37,7 @@ function getPageFromHash(): Page {
   if (hash === 'auth-matrix') return 'auth-matrix';
   if (hash === 'auth-lanes') return 'auth-lanes';
   if (hash === 'auth-split') return 'auth-split';
+  if (hash === 'auth-cards') return 'auth-cards';
   return 'home';
 }
 
@@ -42,7 +45,7 @@ function navigate(page: Page) {
   window.location.hash = page === 'home' ? '' : page;
 }
 
-const AUTH_PAGES: Page[] = ['auth-sequencing', 'auth-matrix', 'auth-lanes', 'auth-split'];
+const AUTH_PAGES: Page[] = ['auth-sequencing', 'auth-matrix', 'auth-lanes', 'auth-split', 'auth-cards'];
 
 function NavBar({ current, collapsed, onToggle }: { current: Page; collapsed: boolean; onToggle: () => void }) {
   const isAuthPage = AUTH_PAGES.includes(current);
@@ -134,6 +137,14 @@ function NavBar({ current, collapsed, onToggle }: { current: Page; collapsed: bo
       >
         Split View
       </Button>
+      <Button
+        size="small"
+        variant={current === 'auth-cards' ? 'contained' : isAuthPage ? 'outlined' : 'text'}
+        onClick={() => navigate('auth-cards')}
+        sx={{ fontSize: '0.75rem' }}
+      >
+        Cards
+      </Button>
 
       <Box sx={{ ml: 'auto' }}>
         <IconButton size="small" onClick={onToggle}>
@@ -168,6 +179,12 @@ const AUTH_CARDS: { page: Page; title: string; description: string }[] = [
     title: 'Auth Sequencing — Split View',
     description:
       'Browse panel on the left, rich priority-stack visualization on the right. Supplier cards with numbered badges and connector lines suggest the "try in this order" workflow.',
+  },
+  {
+    page: 'auth-cards',
+    title: 'Auth Sequencing — Cards (0.5)',
+    description:
+      'Minimum-change wireframe: the current card layout with inline sequence visibility. Supplier order is readable on the card face without entering Edit. New filter sidebar replaces location list.',
   },
 ];
 
@@ -253,6 +270,7 @@ function App() {
       {page === 'auth-matrix' && <AuthSequenceMatrix />}
       {page === 'auth-lanes' && <AuthSequenceLanes />}
       {page === 'auth-split' && <AuthSequenceSplitView />}
+      {page === 'auth-cards' && <AuthSequencingCardView />}
     </ThemeProvider>
   );
 }
