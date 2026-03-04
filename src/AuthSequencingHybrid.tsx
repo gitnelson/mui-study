@@ -1,8 +1,6 @@
 import React, { useState, useRef } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import Chip from '@mui/material/Chip';
-import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import LinearProgress from '@mui/material/LinearProgress';
@@ -256,11 +254,6 @@ const LOCATION_BORDER: Record<LocationStatus, string> = {
   red:    '#e53935',
 };
 
-const LOCATION_BG: Record<LocationStatus, string> = {
-  green:  'transparent',
-  yellow: 'transparent',
-  red:    'transparent',
-};
 
 function formatVol(n: number): string {
   return n >= 1000 ? `${(n / 1000).toFixed(0)}k` : `${n}`;
