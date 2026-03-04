@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import Box from '@mui/material/Box';
@@ -14,6 +14,7 @@ import AuthSequenceMatrix from './AuthSequenceMatrix';
 import AuthSequenceLanes from './AuthSequenceLanes';
 import AuthSequenceSplitView from './AuthSequenceSplitView';
 import AuthSequencingCardView from './AuthSequencingCardView';
+import AuthSequencingHybrid from './AuthSequencingHybrid';
 
 const theme = createTheme({
   palette: {
@@ -28,7 +29,8 @@ type Page =
   | 'auth-matrix'
   | 'auth-lanes'
   | 'auth-split'
-  | 'auth-cards';
+  | 'auth-cards'
+  | 'auth-hybrid';
 
 function getPageFromHash(): Page {
   const hash = window.location.hash.replace('#', '');
@@ -38,6 +40,7 @@ function getPageFromHash(): Page {
   if (hash === 'auth-lanes') return 'auth-lanes';
   if (hash === 'auth-split') return 'auth-split';
   if (hash === 'auth-cards') return 'auth-cards';
+  if (hash === 'auth-hybrid') return 'auth-hybrid';
   return 'home';
 }
 
@@ -101,9 +104,24 @@ function NavBar({ current, collapsed, onToggle }: { current: Page; collapsed: bo
 
       <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
 
-      {/* Auth sequencing group */}
+      {/* Auth Sequencing — Round 2 */}
       <Typography variant="caption" sx={{ color: 'text.disabled', mr: 0.5, fontWeight: 600 }}>
-        Auth Sequencing:
+        R2:
+      </Typography>
+      <Button
+        size="small"
+        variant={current === 'auth-hybrid' ? 'contained' : isAuthPage ? 'outlined' : 'text'}
+        onClick={() => navigate('auth-hybrid')}
+        sx={{ fontSize: '0.75rem' }}
+      >
+        Hybrid
+      </Button>
+
+      <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
+
+      {/* Auth Sequencing — Round 1 */}
+      <Typography variant="caption" sx={{ color: 'text.disabled', mr: 0.5, fontWeight: 600 }}>
+        R1:
       </Typography>
       <Button
         size="small"
@@ -155,97 +173,94 @@ function NavBar({ current, collapsed, onToggle }: { current: Page; collapsed: bo
   );
 }
 
-const AUTH_CARDS: { page: Page; title: string; description: string }[] = [
-  {
-    page: 'auth-sequencing',
-    title: 'Auth Sequencing — Table',
-    description:
-      'DataGrid Premium with 2-level row grouping (Location > Product), drag-and-drop sequence reordering, volume bars, and status indicators. The baseline approach.',
-  },
-  {
-    page: 'auth-matrix',
-    title: 'Auth Sequencing — Heat Map Matrix',
-    description:
-      'Spatial grid where each cell = one location × product combo. Color-coded by health. Click any cell to inspect the full sequence stack in an inline detail panel.',
-  },
-  {
-    page: 'auth-lanes',
-    title: 'Auth Sequencing — Lanes',
-    description:
-      'Swimlane columns — one lane per terminal. Numbered slots show who\'s 1st, 2nd, 3rd priority. Product selector per lane. Ghost slots normalize depth across terminals.',
-  },
-  {
-    page: 'auth-split',
-    title: 'Auth Sequencing — Split View',
-    description:
-      'Browse panel on the left, rich priority-stack visualization on the right. Supplier cards with numbered badges and connector lines suggest the "try in this order" workflow.',
-  },
-  {
-    page: 'auth-cards',
-    title: 'Auth Sequencing — Cards (0.5)',
-    description:
-      'Minimum-change wireframe: the current card layout with inline sequence visibility. Supplier order is readable on the card face without entering Edit. New filter sidebar replaces location list.',
-  },
+type ConceptEntry = { page: Page; label: string };
+
+const ROUND_1: ConceptEntry[] = [
+  { page: 'auth-sequencing', label: 'Table' },
+  { page: 'auth-matrix',    label: 'Heat Map' },
+  { page: 'auth-lanes',     label: 'Lanes' },
+  { page: 'auth-split',     label: 'Split View' },
+  { page: 'auth-cards',     label: 'Cards (0.5)' },
 ];
+
+const ROUND_2: ConceptEntry[] = [
+  { page: 'auth-hybrid', label: 'Cards + Table (Hybrid)' },
+];
+
+const STUDIES: ConceptEntry[] = [
+  { page: 'multiselect', label: 'Fixed Height MultiSelect' },
+];
+
+function ConceptList({ entries }: { entries: ConceptEntry[] }) {
+  if (entries.length === 0) {
+    return (
+      <Typography variant="body2" color="text.disabled" sx={{ py: 1, fontStyle: 'italic' }}>
+        Nothing here yet.
+      </Typography>
+    );
+  }
+  return (
+    <Box component="ul" sx={{ m: 0, p: 0, listStyle: 'none' }}>
+      {entries.map(({ page, label }) => (
+        <Box
+          component="li"
+          key={page}
+          onClick={() => navigate(page)}
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1.5,
+            px: 1.5,
+            py: 1,
+            borderRadius: 1,
+            cursor: 'pointer',
+            '&:hover': { bgcolor: 'action.hover' },
+          }}
+        >
+          <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: 'text.disabled', flexShrink: 0 }} />
+          <Typography variant="body2">{label}</Typography>
+        </Box>
+      ))}
+    </Box>
+  );
+}
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <Box sx={{ mb: 3 }}>
+      <Typography
+        variant="overline"
+        sx={{ color: 'text.disabled', letterSpacing: 1, display: 'block', mb: 0.5 }}
+      >
+        {title}
+      </Typography>
+      <Divider sx={{ mb: 1 }} />
+      {children}
+    </Box>
+  );
+}
 
 function HomePage() {
   return (
-    <Box sx={{ p: 4, maxWidth: 900, mx: 'auto' }}>
-      <Typography variant="h4" gutterBottom>
-        MUI Component Prototypes
+    <Box sx={{ p: 4, maxWidth: 560, mx: 'auto' }}>
+      <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5 }}>
+        MUI Study
       </Typography>
-      <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-        Interactive prototypes exploring MUI patterns for our application.
-      </Typography>
-
-      <Box
-        sx={{
-          p: 3,
-          border: 1,
-          borderColor: 'divider',
-          borderRadius: 2,
-          cursor: 'pointer',
-          mb: 2,
-          '&:hover': { bgcolor: 'action.hover' },
-        }}
-        onClick={() => navigate('multiselect')}
-      >
-        <Typography variant="h6">Fixed Height MultiSelect</Typography>
-        <Typography variant="body2" color="text.secondary">
-          Seven variants of MUI Autocomplete multi-select with fixed height containers,
-          exploring chip display, count summaries, and Select All patterns.
-        </Typography>
-      </Box>
-
-      <Typography variant="subtitle1" sx={{ fontWeight: 700, mt: 3, mb: 1.5 }}>
-        Auth Sequencing — Four Approaches
-      </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        Exploring different UI paradigms for the same user need: "I just need to see
-        everything without going into each one."
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
+        Auth sequencing prototypes + component studies.
       </Typography>
 
-      <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
-        {AUTH_CARDS.map(({ page, title, description }) => (
-          <Box
-            key={page}
-            sx={{
-              p: 3,
-              border: 1,
-              borderColor: 'divider',
-              borderRadius: 2,
-              cursor: 'pointer',
-              '&:hover': { bgcolor: 'action.hover' },
-            }}
-            onClick={() => navigate(page)}
-          >
-            <Typography variant="h6" sx={{ fontSize: '1rem' }}>{title}</Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-              {description}
-            </Typography>
-          </Box>
-        ))}
-      </Box>
+      <Section title="Auth Sequencing — Round 2">
+        <ConceptList entries={ROUND_2} />
+      </Section>
+
+      <Section title="Auth Sequencing — Round 1">
+        <ConceptList entries={ROUND_1} />
+      </Section>
+
+      <Section title="Component Studies">
+        <ConceptList entries={STUDIES} />
+      </Section>
     </Box>
   );
 }
@@ -271,6 +286,7 @@ function App() {
       {page === 'auth-lanes' && <AuthSequenceLanes />}
       {page === 'auth-split' && <AuthSequenceSplitView />}
       {page === 'auth-cards' && <AuthSequencingCardView />}
+      {page === 'auth-hybrid' && <AuthSequencingHybrid />}
     </ThemeProvider>
   );
 }

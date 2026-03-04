@@ -23,3 +23,6 @@ dist-ssr
 *.sln
 *.sw?
 .claude/
+
+# Design iteration plans (local only, not for repo)
+docs/design-iteration-plans/
