@@ -13,11 +13,14 @@ import LinearProgress from '@mui/material/LinearProgress';
 import Divider from '@mui/material/Divider';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import ToggleButton from '@mui/material/ToggleButton';
+import TextField from '@mui/material/TextField';
+import InputAdornment from '@mui/material/InputAdornment';
 import CloseIcon from '@mui/icons-material/Close';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ViewModuleIcon from '@mui/icons-material/ViewModule';
 import ViewListIcon from '@mui/icons-material/ViewList';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import SearchIcon from '@mui/icons-material/Search';
 
 // ---------------------------------------------------------------------------
 // Types (shared with AuthSequencingGrid)
@@ -403,9 +406,9 @@ const MATRIX_DATA = buildMatrixData();
 // ---------------------------------------------------------------------------
 
 const HEALTH_CONFIG = {
-  healthy: { bg: '#e8f5e9', border: '#a5d6a7', dot: '#4caf50', label: 'Healthy' },
+  healthy: { bg: '#e8f5e9', border: '#a5d6a7', dot: '#4caf50', label: 'Active' },
   warning: { bg: '#fff8e1', border: '#ffcc80', dot: '#ff9800', label: 'Expiring' },
-  critical: { bg: '#fce4ec', border: '#ef9a9a', dot: '#f44336', label: 'Critical' },
+  critical: { bg: '#fce4ec', border: '#ef9a9a', dot: '#f44336', label: 'Expired' },
   empty:   { bg: '#f5f5f5', border: '#e0e0e0', dot: '#9e9e9e', label: 'No data' },
 };
 
@@ -427,7 +430,6 @@ function MiniStack({ entries }: { entries: AuthEntry[] }) {
       {entries.map((e) => {
         const statusColor =
           e.status === 'expired' ? '#f44336' : e.status === 'expiring' ? '#ff9800' : '#9e9e9e';
-        const typeColor = TYPE_COLORS[e.type] ?? { bg: '#f5f5f5', text: '#616161' };
         return (
           <Box key={e.sequence} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
             <Typography
@@ -439,7 +441,6 @@ function MiniStack({ entries }: { entries: AuthEntry[] }) {
             <Box
               sx={{
                 flex: 1,
-                bgcolor: typeColor.bg,
                 borderRadius: 0.5,
                 px: 0.75,
                 py: 0.25,
@@ -452,7 +453,7 @@ function MiniStack({ entries }: { entries: AuthEntry[] }) {
               <Typography
                 variant="caption"
                 noWrap
-                sx={{ color: typeColor.text, fontSize: '0.65rem', flex: 1, fontWeight: 500 }}
+                sx={{ color: '#0d3b6e', fontSize: '0.65rem', flex: 1, fontWeight: 500 }}
               >
                 {e.supplier.split(' ')[0]}
               </Typography>
@@ -618,16 +619,24 @@ function MatrixCell({
   isSelected,
   onClick,
   compact,
+  groupBy,
 }: {
   cell: CellData;
   isSelected: boolean;
   onClick: () => void;
   compact: boolean;
+  groupBy: 'byLocation' | 'byProduct';
 }) {
   const health = HEALTH_CONFIG[cell.health];
+  const label = groupBy === 'byProduct'
+    ? `${cell.locationId} ${cell.location}`
+    : cell.productCode;
+  const tooltipLabel = groupBy === 'byProduct'
+    ? `${cell.locationId} ${cell.location}`
+    : cell.productCode;
   return (
     <Tooltip
-      title={compact ? `${cell.productCode} · ${cell.entries.length} supplier${cell.entries.length !== 1 ? 's' : ''} · ${health.label}` : ''}
+      title={compact ? `${tooltipLabel} · ${cell.entries.length} supplier${cell.entries.length !== 1 ? 's' : ''} · ${health.label}` : ''}
       placement="top"
     >
       <Box
@@ -650,10 +659,10 @@ function MatrixCell({
           },
         }}
       >
-        {/* Product code + health dot */}
+        {/* Label + health dot */}
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 0.5 }}>
-          <Typography variant="caption" sx={{ fontWeight: 700, fontSize: compact ? '0.7rem' : '0.75rem' }}>
-            {cell.productCode}
+          <Typography variant="caption" noWrap sx={{ fontWeight: 700, fontSize: compact ? '0.7rem' : '0.75rem' }}>
+            {label}
           </Typography>
           <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: health.dot, flexShrink: 0 }} />
         </Box>
@@ -676,10 +685,11 @@ function MatrixCell({
 
 type GroupBy = 'byLocation' | 'byProduct';
 
-export default function AuthSequenceMatrix() {
+export default function AuthSequenceMatrixV2() {
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const [groupBy, setGroupBy] = useState<GroupBy>('byLocation');
-  const [healthFilter, setHealthFilter] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [search, setSearch] = useState('');
   const [compact, setCompact] = useState(false);
   const [showHint, setShowHint] = useState(false);
 
@@ -688,7 +698,17 @@ export default function AuthSequenceMatrix() {
     : null;
 
   // Filter
-  const filtered = MATRIX_DATA.filter((c) => healthFilter === 'all' || c.health === healthFilter);
+  const filtered = MATRIX_DATA.filter((c) => {
+    if (statusFilter !== 'all' && c.health !== statusFilter) return false;
+    if (!search.trim()) return true;
+    const q = search.trim().toLowerCase();
+    return (
+      c.location.toLowerCase().includes(q) ||
+      c.productCode.toLowerCase().includes(q) ||
+      c.productName.toLowerCase().includes(q) ||
+      c.entries.some((e) => e.supplier.toLowerCase().includes(q))
+    );
+  });
 
   // Group
   const groups: Map<string, { label: string; subLabel: string; cells: CellData[] }> = new Map();
@@ -781,17 +801,32 @@ export default function AuthSequenceMatrix() {
           <ToggleButton value="byProduct">Group by Product</ToggleButton>
         </ToggleButtonGroup>
 
-        <FormControl size="small" sx={{ minWidth: 160 }}>
-          <InputLabel>Health Filter</InputLabel>
+        <TextField
+          size="small"
+          placeholder="Search location, product, or supplier…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          sx={{ width: 280 }}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon fontSize="small" sx={{ color: 'text.disabled' }} />
+              </InputAdornment>
+            ),
+          }}
+        />
+
+        <FormControl size="small" sx={{ minWidth: 140 }}>
+          <InputLabel>Status</InputLabel>
           <Select
-            value={healthFilter}
-            label="Health Filter"
-            onChange={(e) => setHealthFilter(e.target.value)}
+            value={statusFilter}
+            label="Status"
+            onChange={(e) => setStatusFilter(e.target.value)}
           >
-            <MenuItem value="all">All</MenuItem>
-            <MenuItem value="critical">Critical only</MenuItem>
-            <MenuItem value="warning">Expiring only</MenuItem>
-            <MenuItem value="healthy">Healthy only</MenuItem>
+            <MenuItem value="all">All statuses</MenuItem>
+            <MenuItem value="critical">Expired</MenuItem>
+            <MenuItem value="warning">Expiring</MenuItem>
+            <MenuItem value="healthy">Active</MenuItem>
           </Select>
         </FormControl>
 
@@ -864,6 +899,7 @@ export default function AuthSequenceMatrix() {
                       isSelected={selectedKey === key}
                       onClick={() => setSelectedKey(selectedKey === key ? null : key)}
                       compact={compact}
+                      groupBy={groupBy}
                     />
                   );
                 })}

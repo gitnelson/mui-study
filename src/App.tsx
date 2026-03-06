@@ -11,10 +11,14 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import FixedHeightMultiSelect from './FixedHeightMultiSelect';
 import AuthSequencingGrid from './AuthSequencingGrid';
 import AuthSequenceMatrix from './AuthSequenceMatrix';
+import AuthSequenceMatrixV2 from './AuthSequenceMatrixV2';
 import AuthSequenceLanes from './AuthSequenceLanes';
 import AuthSequenceSplitView from './AuthSequenceSplitView';
 import AuthSequencingCardView from './AuthSequencingCardView';
 import AuthSequencingHybrid from './AuthSequencingHybrid';
+import AuthSequencingHybridR2 from './AuthSequencingHybridR2';
+import AuthSequencingHybridR3 from './AuthSequencingHybridR3';
+import AuthSequencingTableR2 from './AuthSequencingTableR2';
 
 const theme = createTheme({
   palette: {
@@ -30,7 +34,11 @@ type Page =
   | 'auth-lanes'
   | 'auth-split'
   | 'auth-cards'
-  | 'auth-hybrid';
+  | 'auth-hybrid'
+  | 'auth-hybrid-r2'
+  | 'auth-hybrid-r3'
+  | 'auth-table-r2'
+  | 'auth-matrix-v2';
 
 function getPageFromHash(): Page {
   const hash = window.location.hash.replace('#', '');
@@ -41,6 +49,10 @@ function getPageFromHash(): Page {
   if (hash === 'auth-split') return 'auth-split';
   if (hash === 'auth-cards') return 'auth-cards';
   if (hash === 'auth-hybrid') return 'auth-hybrid';
+  if (hash === 'auth-hybrid-r2') return 'auth-hybrid-r2';
+  if (hash === 'auth-hybrid-r3') return 'auth-hybrid-r3';
+  if (hash === 'auth-table-r2') return 'auth-table-r2';
+  if (hash === 'auth-matrix-v2') return 'auth-matrix-v2';
   return 'home';
 }
 
@@ -110,11 +122,35 @@ function NavBar({ current, collapsed, onToggle }: { current: Page; collapsed: bo
       </Typography>
       <Button
         size="small"
+        variant={current === 'auth-table-r2' ? 'contained' : isAuthPage ? 'outlined' : 'text'}
+        onClick={() => navigate('auth-table-r2')}
+        sx={{ fontSize: '0.75rem' }}
+      >
+        Table R2
+      </Button>
+      <Button
+        size="small"
+        variant={current === 'auth-hybrid-r3' ? 'contained' : isAuthPage ? 'outlined' : 'text'}
+        onClick={() => navigate('auth-hybrid-r3')}
+        sx={{ fontSize: '0.75rem' }}
+      >
+        Hybrid R3
+      </Button>
+      <Button
+        size="small"
+        variant={current === 'auth-hybrid-r2' ? 'contained' : isAuthPage ? 'outlined' : 'text'}
+        onClick={() => navigate('auth-hybrid-r2')}
+        sx={{ fontSize: '0.75rem' }}
+      >
+        Hybrid R2
+      </Button>
+      <Button
+        size="small"
         variant={current === 'auth-hybrid' ? 'contained' : isAuthPage ? 'outlined' : 'text'}
         onClick={() => navigate('auth-hybrid')}
         sx={{ fontSize: '0.75rem' }}
       >
-        Hybrid
+        Hybrid R1
       </Button>
 
       <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
@@ -130,6 +166,14 @@ function NavBar({ current, collapsed, onToggle }: { current: Page; collapsed: bo
         sx={{ fontSize: '0.75rem' }}
       >
         Table
+      </Button>
+      <Button
+        size="small"
+        variant={current === 'auth-matrix-v2' ? 'contained' : isAuthPage ? 'outlined' : 'text'}
+        onClick={() => navigate('auth-matrix-v2')}
+        sx={{ fontSize: '0.75rem' }}
+      >
+        Heat Map V2
       </Button>
       <Button
         size="small"
@@ -177,6 +221,7 @@ type ConceptEntry = { page: Page; label: string };
 
 const ROUND_1: ConceptEntry[] = [
   { page: 'auth-sequencing', label: 'Table' },
+  { page: 'auth-matrix-v2', label: 'Heat Map V2 — no item bgs, location label by product' },
   { page: 'auth-matrix',    label: 'Heat Map' },
   { page: 'auth-lanes',     label: 'Lanes' },
   { page: 'auth-split',     label: 'Split View' },
@@ -184,7 +229,10 @@ const ROUND_1: ConceptEntry[] = [
 ];
 
 const ROUND_2: ConceptEntry[] = [
-  { page: 'auth-hybrid', label: 'Cards + Table (Hybrid)' },
+  { page: 'auth-table-r2',  label: 'Table R2 — view only, search + status filter' },
+  { page: 'auth-hybrid-r3', label: 'Cards + Table (Hybrid R3 — view only)' },
+  { page: 'auth-hybrid-r2', label: 'Cards + Table (Hybrid R2)' },
+  { page: 'auth-hybrid',    label: 'Cards + Table (Hybrid R1)' },
 ];
 
 const STUDIES: ConceptEntry[] = [
@@ -283,10 +331,14 @@ function App() {
       {page === 'multiselect' && <FixedHeightMultiSelect />}
       {page === 'auth-sequencing' && <AuthSequencingGrid />}
       {page === 'auth-matrix' && <AuthSequenceMatrix />}
+      {page === 'auth-matrix-v2' && <AuthSequenceMatrixV2 />}
       {page === 'auth-lanes' && <AuthSequenceLanes />}
       {page === 'auth-split' && <AuthSequenceSplitView />}
       {page === 'auth-cards' && <AuthSequencingCardView />}
       {page === 'auth-hybrid' && <AuthSequencingHybrid />}
+      {page === 'auth-hybrid-r2' && <AuthSequencingHybridR2 />}
+      {page === 'auth-hybrid-r3' && <AuthSequencingHybridR3 />}
+      {page === 'auth-table-r2' && <AuthSequencingTableR2 />}
     </ThemeProvider>
   );
 }
