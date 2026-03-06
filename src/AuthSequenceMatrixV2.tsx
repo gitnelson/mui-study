@@ -740,9 +740,6 @@ export default function AuthSequenceMatrixV2() {
   }
 
   // Summary counts
-  const totalCells = MATRIX_DATA.length;
-  const criticalCount = MATRIX_DATA.filter((c) => c.health === 'critical').length;
-  const warningCount = MATRIX_DATA.filter((c) => c.health === 'warning').length;
 
   return (
     <Box sx={{ p: 3, maxWidth: 1600, mx: 'auto' }}>
@@ -762,31 +759,6 @@ export default function AuthSequenceMatrixV2() {
             Click any cell to inspect the full sequence stack.
           </Typography>
         </Collapse>
-      </Box>
-
-      {/* Summary bar */}
-      <Box sx={{ display: 'flex', gap: 2, mb: 3, flexWrap: 'wrap' }}>
-        {[
-          { label: `${totalCells} total`, color: 'text.secondary', bg: '#f5f5f5', border: '#e0e0e0' },
-          { label: `${criticalCount} critical`, color: '#c62828', bg: '#fce4ec', border: '#ef9a9a' },
-          { label: `${warningCount} expiring`, color: '#e65100', bg: '#fff8e1', border: '#ffcc80' },
-          { label: `${totalCells - criticalCount - warningCount} healthy`, color: '#2e7d32', bg: '#e8f5e9', border: '#a5d6a7' },
-        ].map(({ label, color, bg, border }) => (
-          <Box
-            key={label}
-            sx={{
-              px: 2,
-              py: 0.75,
-              borderRadius: 5,
-              bgcolor: bg,
-              border: `1px solid ${border}`,
-            }}
-          >
-            <Typography variant="body2" sx={{ fontWeight: 600, color }}>
-              {label}
-            </Typography>
-          </Box>
-        ))}
       </Box>
 
       {/* Controls */}
@@ -885,8 +857,8 @@ export default function AuthSequenceMatrixV2() {
                 sx={{
                   display: 'grid',
                   gridTemplateColumns: compact
-                    ? 'repeat(auto-fill, minmax(80px, 1fr))'
-                    : 'repeat(auto-fill, minmax(140px, 1fr))',
+                    ? 'repeat(auto-fill, minmax(128px, 1fr))'
+                    : 'repeat(auto-fill, minmax(220px, 1fr))',
                   gap: 1,
                 }}
               >
